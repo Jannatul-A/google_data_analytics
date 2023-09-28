@@ -1,0 +1,127 @@
+---
+title: "Case Study - Bike Share: Data Cleaning & Transformation"
+author: "Jannatul Ashpia"
+output: html_document
+---
+```{r warning=FALSE}
+#Load libraries
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+```
+
+
+```{r echo=FALSE, warning=FALSE, show_col_types=FALSE}
+#read data frames
+april_Data <- read_csv('202304-divvy-tripdata.csv', show_col_types=FALSE)
+may_Data <- read_csv('202305-divvy-tripdata.csv', show_col_types=FALSE)
+june_Data <- read_csv('202306-divvy-tripdata.csv', show_col_types=FALSE)
+```
+
+```{r error=FALSE, message=FALSE}
+glimpse(april_Data)
+```
+```{r}
+glimpse(may_Data)
+```
+```{r}
+glimpse(june_Data)
+```
+**Merge the 3 data frames**
+
+```{r}
+merged_Df <- bind_rows(april_Data, may_Data, june_Data)
+```
+## Clean up
+**Information Regarding longitude and Latitude is not necessary for our case, thus it can be removed**
+```{r}
+ride_data <- merged_Df %>% 
+  select(1:8,13) 
+
+colnames(ride_data)
+summary(ride_data)
+```
+#### Changes to apply to the Dataset
+* Add a _ride_length_ column calculating the duration for trips
+* Remove rows for column _ride_length_ if it is less than 0
+* Split the _started_at_ column further into _month_, _day_, _days of week_
+
+```{r}
+#add ride_length column
+ride_data <- ride_data %>% 
+  mutate(ride_length = ended_at - started_at)
+```
+This results in ride_length to appear as **seconds**
+```{r}
+#convert it to numeric
+ride_data$ride_length <- as.numeric(as.character(ride_data$ride_length))
+```
+
+```{r}
+#check for negative values
+ride_data%>%
+  select(ride_length) %>% 
+  filter(ride_length < 0)
+```
+
+
+```{r}
+#add columns for month, date, day
+ride_data <- ride_data %>% 
+  mutate(month = format(as.Date(started_at), "%m"),
+         day = format(as.Date(started_at), "%d"),
+         day_of_week = format(as.Date(started_at), "%A"),
+         hour = hour(started_at))
+
+# create a new data frame excluding negative ride_length
+trip_data <- ride_data[!(ride_data$ride_length<0),]
+```
+
+## Descriptive Analysis
+**Note**: ride_length is calculated in _seconds_
+```{r}
+#analyzing ride_length
+summary(trip_data$ride_length)
+```
+
+#### Casual vs Member Statistics on ride_length
+```{r}
+trip_data %>% 
+  group_by(member_casual) %>% 
+  summarise(avg = mean(ride_length),
+            min = min(ride_length),
+            median = median(ride_length),
+            max = max(ride_length))
+```
+
+```{r include=FALSE}
+#fix weekdays ordering
+trip_data$day_of_week <- ordered(trip_data$day_of_week, 
+                                    levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+
+#### Weekdays ride_length comparision for the member types
+
+```{r warning=FALSE, message=FALSE}
+trip_data %>% 
+  group_by(member_casual, day_of_week) %>% 
+  summarise(avg = mean(ride_length),
+            min = min(ride_length),
+            median = median(ride_length),
+            max = max(ride_length)) %>% 
+  arrange(member_casual, day_of_week)
+```
+
+#### Total weekdays ride_length among member types
+```{r warning=FALSE, message=FALSE}
+trip_data %>% 
+  group_by(member_casual, day_of_week) %>% 
+  summarise(total_ride = n(),
+            avg_duration = mean(ride_length)) %>% 
+  arrange(member_casual, day_of_week)
+```
+
+```{r eval=FALSE, include=FALSE}
+write_csv(trip_data, file = "/Volumes/Seagate_Por/GoogleAnalytics/csv/trip_data.csv")
+```
+

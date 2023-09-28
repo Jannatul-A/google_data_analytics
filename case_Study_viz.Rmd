@@ -1,0 +1,129 @@
+---
+title: "Case Study - Bike Share: Analysis (Vizualization)"
+author: "Jannatul Ashpia"
+output: html_document
+---
+
+```{r warning=FALSE, include=FALSE}
+#Load libraries
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r warning=FALSE, include=FALSE, show_col_types=FALSE}
+#read data
+trips <- read_csv("trip_data.csv", show_col_types=FALSE)
+trips_long <- trips %>% 
+  group_by(member_casual) %>% 
+  summarise(count = n(),
+            A = round(n()/nrow(trips) * 100, 2),
+            total = sum(ride_length),
+            B = round(total/sum(trips$ride_length) * 100), 2)
+
+#transform the table into long format
+trips_long <- trips_long %>% pivot_longer(cols=c('A', 'B'),
+                    names_to='type',
+                    values_to='percent')
+```
+
+### Figure 1A, 1B
+```{r echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+#Pie Chart
+trips_long %>%
+  ggplot(aes(x = "", y = percent, fill = member_casual)) +
+  geom_col() +
+  geom_label(aes(label = percent),
+             position = position_stack(vjust = 0.5),
+             show.legend = FALSE) +
+  coord_polar(theta = "y") +
+  facet_wrap(~type) +
+  theme_void() +
+  labs( title = 'Number of Rides vs Total Ride Duration (%)',
+        caption = "Figure (A): Number of Rides \nFigure (B): Total Ride Duration") +
+  theme(plot.title = element_text(hjust = 0.5, color = "#3E5C76", size = 15, face = "bold", vjust = 10),
+        plot.caption = element_text(hjust = 0))
+  
+```
+Here the vizualizations compares the __Number of Rides__ and __Total Ride Duration__:   
+__Figure A__ shows that annual members ride more frequently than casual members, while __Figure B__ highlights the shorter ride duration among the annual members. Despite the lower frequency of rides among casual riders, they tend to use bikes for longer duration.
+
+### Figure 2
+```{r echo=FALSE, fig.align='center', message=FALSE, warning=FALSE, fig.cap="Note: 04 - April, 05 - May, 06 - June"}
+#avg ride duration through month
+trips %>%
+  group_by(member_casual, month) %>%
+  summarise(avg_ride = mean(ride_length)) %>%
+  ggplot(aes(x = month, y = avg_ride, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs( title = 'Average ride length through April, May, June') +
+        xlab("months") +
+        ylab("Average Ride Length (secs)") +
+  theme(plot.title = element_text(color = "#3E5C76", size = 15, face = "bold", hjust = 0.5))
+```
+we observe that the average ride length for casual riders remains consistently high throughout the three-month period, reaching its peak in June. Conversely, the average ride length for annual members appears to exhibit a relatively stable pattern. 
+
+### Figure 3
+```{r echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+trips$day_of_week <- ordered(trips$day_of_week, 
+                                 levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+trips %>%
+  group_by(member_casual, month, day_of_week) %>%
+  summarise(total_ride = n()) %>%
+  ggplot(aes(x = day_of_week, y = total_ride, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~month) +
+  labs(x = 'Days of Week', 
+       y = 'Number of Ride', 
+       title = 'Number of Rides by member type for April, May, June') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.8, hjust=0.8),
+        plot.title = element_text(color = "#3E5C76", size = 15, face = "bold", hjust = 0.5))
+```
+When examining the data by analyzing the days of the week, we observe distinct patterns. In April and May, it becomes evident that the number of rides during the weekend predominantly surges among casual riders. However, come June, we discern a peak in ride numbers occurring on both Friday and Saturday for casual riders.
+
+For annual members, the peak day vary from month to month. In June, for instance, we observe the highest ride counts on Thursday and Friday.
+
+### Figure 4
+```{r echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+trips %>% 
+  group_by(member_casual, day_of_week, month) %>% 
+  summarise(avg_ride = mean(ride_length)) %>% 
+  arrange(member_casual, day_of_week) %>% 
+  ggplot(aes(x = day_of_week, y=avg_ride, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~month) +
+  labs(x = 'Days of Week', 
+       y = 'Average Ride Length (sec)', 
+       title = 'Average Ride length by member type for April, May, June') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.8, hjust=0.8),
+        plot.title = element_text(color = "#3E5C76", size = 15, face = "bold", hjust = 0.5))
+```
+
+This analysis further dissects our earlier findings by examining the data on a day of the week basis. One conspicuous trend that emerges is the consistently high average ride duration during weekends, regardless of whether the riders are casual or annual members.  
+
+_Upon closer examination of Friday and Saturday.._  
+
+### Figure 5
+```{r echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+trips %>% 
+  group_by(member_casual, day_of_week, month, hour) %>%
+  filter(day_of_week == 'Saturday'| day_of_week == 'Friday') %>% 
+  summarise(ride = n()) %>%
+  ggplot(aes(x = hour, y = ride, fill = member_casual)) +
+  geom_area() +
+  facet_grid(day_of_week ~ month) +
+  labs(x = 'Time', 
+       y = 'Total Ride Count', 
+       title = 'Hourly Breakdown of Ride count on Fridays and Saturdays') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.8, hjust=0.8),
+        plot.title = element_text(color = "#3E5C76", size = 15, face = "bold", hjust = 0.5))
+
+```
+The graph displays a similar pattern in the behavior of both member types. On Fridays, both member types experience a peak in the number of rides at approximately 17:00 (5 PM).
+
+On Saturdays, it is evident that the peak remains relatively steady from 12:00 PM to 17:00 (5 PM).
+
+### Top three Recommendations:
+ * Implement a pricing system centered on ride duration, such as a per-minute charge specifically for weekends   
+ * Establish a time limit on single rides  
+ * Raise the prices for full/single rides during the month of June   
