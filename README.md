@@ -24,8 +24,16 @@ This project entails the analysis of bike trip data for two distinct member cate
 
 **Dataset**: The analysis will cover bike data for April, May, and June of 2023.
 
-## Files and Folders
+It includes information on:
+> bike ride id, station names, station id, starting time & date, ending time & date
 
+**Limitation**: The recommendations were solely based on 3 months of data.
+
+**To enhance our findings**:
+ * Expanding the dataset to cover more months would provide a broader perspective
+ * it would've further improved specificity if we had information on whether casual riders were using bikes for single rides or for full days
+
+## Files
 
 `Case_Study_Bikes.pdf`: This document outlines the process of cleaning, transforming, and performing descriptive analysis on the bike trip data.
 
