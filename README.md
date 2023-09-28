@@ -20,14 +20,14 @@ This project entails the analysis of bike trip data for two distinct member cate
   
 The objective of this project is to gain insights into the usage patterns of Cyclistic bikes by casual riders and annual members. These insights will serve as a foundation for devising an effective marketing strategy aimed at converting casual riders into annual members. 
 
-**Dataset**: The analysis will cover bike data for the months of April, May, and June in 2023.
+**Dataset**: The analysis will cover bike data for April, May, and June of 2023.
 
 ## Files and Folders
 
 
-`Case_Study_Bikes.html`: This document outlines the process of cleaning, transforming, and performing descriptive analysis on the bike trip data.
+`Case_Study_Bikes.pdf`: This document outlines the process of cleaning, transforming, and performing descriptive analysis on the bike trip data.
 
-`case_Study_viz.html`: This document contains data visualizations and lists insights for making recommendations.
+`case_Study_viz.pdf`: This document contains data visualizations and lists insights for making recommendations.
 
 `Case_Study_Bikes.Rmd`: R Markdown file details the data cleaning process.
 
