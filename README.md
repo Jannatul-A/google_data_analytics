@@ -18,7 +18,9 @@ This project entails the analysis of bike trip data for two distinct member cate
 * Casual riders: those who have purchased full-day or single rides
 * Annual members: individuals with annual memberships
   
-The objective of this project is to gain insights into the usage patterns of Cyclistic bikes by casual riders and annual members. These insights will serve as a foundation for devising an effective marketing strategy aimed at converting casual riders into annual members. 
+**The objective of this project:**
+  * gain insights into the usage patterns of Cyclistic bikes by casual riders and annual members.
+  * devise an effective marketing strategy aimed at converting casual riders into annual members. 
 
 **Dataset**: The analysis will cover bike data for April, May, and June of 2023.
 
